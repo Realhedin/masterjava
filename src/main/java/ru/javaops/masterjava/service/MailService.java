@@ -3,9 +3,11 @@ package ru.javaops.masterjava.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class MailService {
@@ -18,27 +20,32 @@ public class MailService {
     private final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
 
     public GroupResult sendToList(final String template, final Set<String> emails) throws Exception {
+
         //submit sending Emails to executor and return list of Futures
         List<Future<MailResult>> futuresOfMailResults = emails.stream()
                 .map(email -> mailExecutor.submit(() -> sendToUser(template, email)))
                 .collect(Collectors.toList());
 
+        //return callable and move all logic inside
+        return new Callable<GroupResult>() {
+            private int success = 0;
+            private List<MailResult> failed = new ArrayList<>();
+            private String failedCause;
 
-
-        int success = 0;
-        List<MailResult> failed = new ArrayList<>();
-        String failedCause = null;
-        for (Future<MailResult> future : futuresOfMailResults) {
-            MailResult mailResult = future.get();
-            if (mailResult.isOk()) {
-                success++;
-            } else {
-                failed.add(mailResult);
-                failedCause = mailResult.result;
+            @Override
+            public GroupResult call() throws Exception {
+                for (Future<MailResult> future : futuresOfMailResults) {
+                    MailResult mailResult = future.get(10, TimeUnit.SECONDS);
+                    if (mailResult.isOk()) {
+                        success++;
+                    } else {
+                        failed.add(mailResult);
+                        failedCause = mailResult.result;
+                    }
+                }
+                return new GroupResult(success, failed, failedCause);
             }
-        }
-
-        return new GroupResult(success, failed, failedCause);
+        }.call();
     }
 
 
