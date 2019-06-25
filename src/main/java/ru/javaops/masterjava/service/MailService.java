@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class MailService {
@@ -22,6 +23,9 @@ public class MailService {
     private final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
 
     public GroupResult sendToList(final String template, final Set<String> emails) throws Exception {
+
+        //CompletionService returns futures which are completed (in completion order)
+        final CompletionService<MailResult> completionService = new ExecutorCompletionService<>(mailExecutor);
 
         //submit sending Emails to executor and return list of Futures
         List<Future<MailResult>> futuresOfMailResults = emails.stream()
@@ -36,26 +40,33 @@ public class MailService {
 
             @Override
             public GroupResult call() {
-                for (Future<MailResult> future : futuresOfMailResults) {
-                    MailResult mailResult = null;
+                //check that list is not empty
+                while (!futuresOfMailResults.isEmpty()) {
                     try {
-                        mailResult = future.get(10, TimeUnit.SECONDS);
+                        //get future which already finished its task
+                        Future<MailResult> completedFuture = completionService.poll(10, TimeUnit.SECONDS);
+                        if (completedFuture == null) {
+                            return cancelWithFail(INTERRUPTED_BY_TIMEOUT);
+                        }
+                        //remove from the list
+                        futuresOfMailResults.remove(completedFuture);
+                        //get results (which is automatically completed)
+                        MailResult mailResult = completedFuture.get();
+                        if (mailResult.isOk()) {
+                            success++;
+                        } else {
+                            failed.add(mailResult);
+                            failedCause = mailResult.result;
+                            if (failed.size() >= 5) {
+                                return cancelWithFail(INTERRUPTED_BY_FAULTS_NUMBER);
+                            }
+                        }
                     } catch (InterruptedException e) {
                         cancelWithFail(INTERRUPTED_EXCEPTION);
                     } catch (ExecutionException e) {
-                        return cancelWithFail(e.getCause().toString());
-                    } catch (TimeoutException e) {
-                        cancelWithFail(INTERRUPTED_BY_TIMEOUT);
+                        cancelWithFail(e.getCause().toString());
                     }
-                    if (mailResult.isOk()) {
-                        success++;
-                    } else {
-                        failed.add(mailResult);
-                        failedCause = mailResult.result;
-                        if (failed.size() >= 5) {
-                            return cancelWithFail(INTERRUPTED_BY_FAULTS_NUMBER);
-                        }
-                    }
+
                 }
                 return new GroupResult(success, failed, failedCause);
             }
