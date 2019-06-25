@@ -1,8 +1,11 @@
 package ru.javaops.masterjava.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MailService {
     private static final String OK = "OK";
@@ -11,8 +14,29 @@ public class MailService {
     private static final String INTERRUPTED_BY_TIMEOUT = "+++ Interrupted by timeout";
     private static final String INTERRUPTED_EXCEPTION = "+++ InterruptedException";
 
+    private final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
+
     public GroupResult sendToList(final String template, final Set<String> emails) throws Exception {
-        return new GroupResult(0, Collections.emptyList(), null);
+        List<MailResult> mailResults = new ArrayList<>();
+        for (String email : emails) {
+            Future<MailResult> submit = mailExecutor.submit(() -> sendToUser(template, email));
+            //not a good approach, because it blocks thread until future is done.
+            mailResults.add(submit.get());
+        }
+
+        int success = 0;
+        List<MailResult> failed = new ArrayList<>();
+        String failedCause = null;
+        for (MailResult mailResult : mailResults) {
+            if (mailResult.isOk()) {
+                success++;
+            } else {
+                failed.add(mailResult);
+                failedCause = mailResult.result;
+            }
+        }
+
+        return new GroupResult(success, failed, failedCause);
     }
 
 
