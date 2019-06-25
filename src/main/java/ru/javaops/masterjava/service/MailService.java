@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class MailService {
     private static final String OK = "OK";
@@ -17,17 +18,18 @@ public class MailService {
     private final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
 
     public GroupResult sendToList(final String template, final Set<String> emails) throws Exception {
-        List<MailResult> mailResults = new ArrayList<>();
-        for (String email : emails) {
-            Future<MailResult> submit = mailExecutor.submit(() -> sendToUser(template, email));
-            //not a good approach, because it blocks thread until future is done.
-            mailResults.add(submit.get());
-        }
+        //submit sending Emails to executor and return list of Futures
+        List<Future<MailResult>> futuresOfMailResults = emails.stream()
+                .map(email -> mailExecutor.submit(() -> sendToUser(template, email)))
+                .collect(Collectors.toList());
+
+
 
         int success = 0;
         List<MailResult> failed = new ArrayList<>();
         String failedCause = null;
-        for (MailResult mailResult : mailResults) {
+        for (Future<MailResult> future : futuresOfMailResults) {
+            MailResult mailResult = future.get();
             if (mailResult.isOk()) {
                 success++;
             } else {
