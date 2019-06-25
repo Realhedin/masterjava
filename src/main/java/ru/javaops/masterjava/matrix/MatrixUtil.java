@@ -23,11 +23,20 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
+        //1st approach - transposition matrix
+        //it allows us to use L1 cache - matrix row is cached (very fast memory call)
+        int[][] transpMatrixB = new int[matrixSize][matrixSize];
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                transpMatrixB[j][i] = matrixB[i][j];
+            }
+        }
+
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
-                    sum += matrixA[i][k] * matrixB[k][j];
+                    sum += matrixA[i][k] * transpMatrixB[j][k];
                 }
                 matrixC[i][j] = sum;
             }
