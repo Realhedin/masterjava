@@ -71,8 +71,10 @@ public class MailService {
                 return new GroupResult(success, failed, failedCause);
             }
 
-            private GroupResult cancelWithFail(String interruptedByFaultsNumber) {
-                return null;
+            //if exception, then cancel all left tasks
+            private GroupResult cancelWithFail(String cause) {
+                futuresOfMailResults.forEach(f -> f.cancel(true));
+                return new GroupResult(success, failed, cause);
             }
         }.call();
     }
