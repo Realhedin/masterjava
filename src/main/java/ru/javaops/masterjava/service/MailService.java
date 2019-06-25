@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class MailService {
@@ -33,17 +35,33 @@ public class MailService {
             private String failedCause;
 
             @Override
-            public GroupResult call() throws Exception {
+            public GroupResult call() {
                 for (Future<MailResult> future : futuresOfMailResults) {
-                    MailResult mailResult = future.get(10, TimeUnit.SECONDS);
+                    MailResult mailResult = null;
+                    try {
+                        mailResult = future.get(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        cancelWithFail(INTERRUPTED_EXCEPTION);
+                    } catch (ExecutionException e) {
+                        return cancelWithFail(e.getCause().toString());
+                    } catch (TimeoutException e) {
+                        cancelWithFail(INTERRUPTED_BY_TIMEOUT);
+                    }
                     if (mailResult.isOk()) {
                         success++;
                     } else {
                         failed.add(mailResult);
                         failedCause = mailResult.result;
+                        if (failed.size() >= 5) {
+                            return cancelWithFail(INTERRUPTED_BY_FAULTS_NUMBER);
+                        }
                     }
                 }
                 return new GroupResult(success, failed, failedCause);
+            }
+
+            private GroupResult cancelWithFail(String interruptedByFaultsNumber) {
+                return null;
             }
         }.call();
     }
