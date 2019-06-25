@@ -29,7 +29,7 @@ public class MailService {
 
         //submit sending Emails to executor and return list of Futures
         List<Future<MailResult>> futuresOfMailResults = emails.stream()
-                .map(email -> mailExecutor.submit(() -> sendToUser(template, email)))
+                .map(email -> completionService.submit(() -> sendToUser(template, email)))
                 .collect(Collectors.toList());
 
         //return callable and move all logic inside
