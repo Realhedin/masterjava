@@ -19,6 +19,8 @@ public class MainMatrix {
         final int[][] matrixB = MatrixUtil.create(MATRIX_SIZE);
 
         double singleThreadSum = 0.;
+        double singleThreadSum2 = 0.;
+        double singleThreadSum3 = 0.;
         double concurrentThreadSum = 0.;
         int count = 1;
         while (count < 6) {
@@ -26,8 +28,20 @@ public class MainMatrix {
             long start = System.currentTimeMillis();
             final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
             double duration = (System.currentTimeMillis() - start) / 1000.;
-            out("Single thread time, sec: %.3f", duration);
+            out("Single thread time Basic, sec: %.3f", duration);
             singleThreadSum += duration;
+
+            start = System.currentTimeMillis();
+            final int[][] matrixC2 = MatrixUtil.singleThreadMultiply2(matrixA, matrixB);
+            duration = (System.currentTimeMillis() - start) / 1000.;
+            out("Single thread time, sec: %.3f", duration);
+            singleThreadSum2 += duration;
+
+            start = System.currentTimeMillis();
+            final int[][] matrixC3 = MatrixUtil.singleThreadMultiply2(matrixA, matrixB);
+            duration = (System.currentTimeMillis() - start) / 1000.;
+            out("Single thread time, sec: %.3f", duration);
+            singleThreadSum3 += duration;
 
             start = System.currentTimeMillis();
             final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
@@ -35,14 +49,16 @@ public class MainMatrix {
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
 
-            if (!MatrixUtil.compare(matrixC, concurrentMatrixC)) {
+            if (!MatrixUtil.compare(matrixC, matrixC3)) {
                 System.err.println("Comparison failed");
                 break;
             }
             count++;
         }
         executor.shutdown();
-        out("\nAverage single thread time, sec: %.3f", singleThreadSum / 5.);
+        out("\nAverage single thread time Basic, sec: %.3f", singleThreadSum / 5.);
+        out("Average single thread time Transp, sec: %.3f", singleThreadSum2 / 5.);
+        out("Average single thread time Transp in one loop, sec: %.3f", singleThreadSum3 / 5.);
         out("Average concurrent thread time, sec: %.3f", concurrentThreadSum / 5.);
     }
 
