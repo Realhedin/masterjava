@@ -1,8 +1,14 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * gkislin
@@ -15,10 +21,32 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
+        ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
+
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                final int ii = i;
+                final int jj = j;
+                int sum = 0;
+                List<Future<Integer>> futures = IntStream.range(0, matrixSize)
+                        .mapToObj(k -> completionService.submit(() -> matrixA[ii][k] * matrixB[k][jj]))
+                        .collect(Collectors.toList());
+
+                while (!futures.isEmpty()) {
+                    Future<Integer> complFuture = completionService.poll(5, TimeUnit.SECONDS);
+                    if (complFuture != null) {
+                        sum += complFuture.get();
+                        futures.remove(complFuture);
+                    }
+                }
+                matrixC[i][j] = sum;
+            }
+        }
+
         return matrixC;
     }
 
-    // TODO optimize by https://habrahabr.ru/post/114797/
+    
     //basic approach O(n^3)
     public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
