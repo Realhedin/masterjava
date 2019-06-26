@@ -23,15 +23,20 @@ public class MatrixUtil {
 
         ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
 
+        int[][] transpMatrixB = new int[matrixSize][matrixSize];
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                transpMatrixB[j][i] = matrixB[i][j];
+            }
+        }
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
                 final int ii = i;
                 final int jj = j;
                 int sum = 0;
                 List<Future<Integer>> futures = IntStream.range(0, matrixSize)
-                        .mapToObj(k -> completionService.submit(() -> matrixA[ii][k] * matrixB[k][jj]))
+                        .mapToObj(k -> completionService.submit(() -> matrixA[ii][k] * transpMatrixB[jj][k]))
                         .collect(Collectors.toList());
-
                 while (!futures.isEmpty()) {
                     Future<Integer> complFuture = completionService.poll(5, TimeUnit.SECONDS);
                     if (complFuture != null) {
