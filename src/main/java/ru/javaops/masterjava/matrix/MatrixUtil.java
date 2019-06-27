@@ -2,6 +2,7 @@ package ru.javaops.masterjava.matrix;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -17,44 +18,42 @@ import java.util.stream.IntStream;
  */
 public class MatrixUtil {
 
-    // TODO implement parallel multiplication matrixA*matrixB
-//    public static int[][] concurrentMultiply3(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
-//        final int matrixSize = matrixA.length;
-//        final int[][] matrixC = new int[matrixSize][matrixSize];
-//
-//
-//        ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
-//
-//        int[][] transpMatrixB = new int[matrixSize][matrixSize];
-//        for (int i = 0; i < matrixSize; i++) {
-//            for (int j = 0; j < matrixSize; j++) {
-//                transpMatrixB[j][i] = matrixB[i][j];
-//            }
-//        }
-//
-//        IntStream.range(0, matrixSize)
-//                .parallel()
-//                .forEachOrdered(i -> {
-//                    IntStream.range(0,matrixSize)
-//                            .parallel()
-//                            .forEachOrdered(j-> {
-//                                int sum = 0;
-//                                IntStream.range(0, matrixSize)
-//                                        .mapToObj(k -> {
-//                                            sum = matrixA[i][k] * transpMatrixB[j][k];
-//
-//                                        });
-//
-//                            });
-//                })
-//                .collect(Collectors.toList());
-//
-//
-//
-//    }
+    // parallel mechanism using streams
+    //based  2nd approach is to combine transposition and its usage
+    public static int[][] concurrentMultiply3(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
 
-    //Multithreaded version of multiplying matrices using 2nd approach
-    //where we take explicitly row and column
+        List<Callable<Void>> tasks = IntStream.range(0, matrixSize)
+                .parallel()
+                .mapToObj(i -> new Callable<Void>() {
+                    final int[] thatColumn = new int[matrixSize];
+
+                    @Override
+                    public Void call() throws Exception {
+                        //get column as a row
+                        for (int k = 0; k < matrixSize; k++) {
+                            thatColumn[k] = matrixB[k][i];
+                        }
+                        //calculate
+                        for (int j = 0; j < matrixSize; j++) {
+                            int thisRow[] = matrixA[j];
+                            int sum = 0;
+                            for (int k = 0; k < matrixSize; k++) {
+                                sum += thisRow[k] * thatColumn[k];
+                            }
+                            matrixC[j][i] = sum;
+                        }
+                        return null;
+                    }
+                }).collect(Collectors.toList());
+        executor.invokeAll(tasks);
+        return matrixC;
+    }
+
+    
+    //Multithreaded version with CompletionService
+    //of multiplying matrices using 2nd approach where we take explicitly row and column
     public static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
 
@@ -105,7 +104,8 @@ public class MatrixUtil {
     }
 
 
-
+    //Bad!
+    //Parallel implementation basid using only last loop
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];

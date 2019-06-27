@@ -22,6 +22,7 @@ public class MainMatrix {
         double singleThreadSum2 = 0.;
         double singleThreadSum3 = 0.;
         double concurrentThreadSum = 0.;
+        double concurrentThreadSum3 = 0.;
         int count = 1;
         while (count < 6) {
             System.out.println("Pass " + count);
@@ -49,6 +50,12 @@ public class MainMatrix {
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
 
+            start = System.currentTimeMillis();
+            final int[][] concurrentMatrixC3 = MatrixUtil.concurrentMultiply3(matrixA, matrixB, executor);
+            duration = (System.currentTimeMillis() - start) / 1000.;
+            out("Concurrent thread time,  Threads, sec: %.3f", duration);
+            concurrentThreadSum3 += duration;
+
             if (!MatrixUtil.compare(matrixC, concurrentMatrixC)) {
                 System.err.println("Comparison failed");
                 break;
@@ -60,6 +67,7 @@ public class MainMatrix {
         out("Average single thread time Transp, sec: %.3f", singleThreadSum2 / 5.);
         out("Average single thread time Transp in one loop, sec: %.3f", singleThreadSum3 / 5.);
         out("Average concurrent thread time, sec: %.3f", concurrentThreadSum / 5.);
+        out("Average concurrent thread time, Threads, sec: %.3f", concurrentThreadSum3 / 5.);
     }
 
     private static void out(String format, double ms) {
