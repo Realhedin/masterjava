@@ -2,6 +2,7 @@ package ru.javaops.masterjava.matrix;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +18,94 @@ import java.util.stream.IntStream;
 public class MatrixUtil {
 
     // TODO implement parallel multiplication matrixA*matrixB
+//    public static int[][] concurrentMultiply3(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+//        final int matrixSize = matrixA.length;
+//        final int[][] matrixC = new int[matrixSize][matrixSize];
+//
+//
+//        ExecutorCompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
+//
+//        int[][] transpMatrixB = new int[matrixSize][matrixSize];
+//        for (int i = 0; i < matrixSize; i++) {
+//            for (int j = 0; j < matrixSize; j++) {
+//                transpMatrixB[j][i] = matrixB[i][j];
+//            }
+//        }
+//
+//        IntStream.range(0, matrixSize)
+//                .parallel()
+//                .forEachOrdered(i -> {
+//                    IntStream.range(0,matrixSize)
+//                            .parallel()
+//                            .forEachOrdered(j-> {
+//                                int sum = 0;
+//                                IntStream.range(0, matrixSize)
+//                                        .mapToObj(k -> {
+//                                            sum = matrixA[i][k] * transpMatrixB[j][k];
+//
+//                                        });
+//
+//                            });
+//                })
+//                .collect(Collectors.toList());
+//
+//
+//
+//    }
+
+    //Multithreaded version of multiplying matrices using 2nd approach
+    //where we take explicitly row and column
+    public static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+        final int matrixSize = matrixA.length;
+
+        //internal class
+         class ColumnMultipleResult {
+             final int col;
+             final int[] columnC;
+
+             public ColumnMultipleResult(int col, int[] columnC) {
+                 this.col = col;
+                 this.columnC = columnC;
+             }
+         }
+
+        CompletionService<ColumnMultipleResult> completionService = new ExecutorCompletionService<>(executor);
+
+        for (int j = 0; j < matrixSize; j++) {
+            final int col = j;
+            final int[] columnB = new int[matrixSize];
+            for (int k = 0; k < matrixSize; k++) {
+                columnB[k] = matrixB[k][col];
+            }
+            //getting calculated columns
+            completionService.submit(() -> {
+                final int[] columnC = new int[matrixSize];
+                for (int row = 0; row < matrixSize; row++) {
+                    final int[] rowA = matrixA[row];
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += rowA[k] * columnB[k];
+                    }
+                    columnC[row] = sum;
+                }
+                return new ColumnMultipleResult(col, columnC);
+            });
+        }
+
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        //need to fill result matrix
+        for (int i = 0; i < matrixSize; i++) {
+            ColumnMultipleResult res = completionService.take().get();
+            for (int k = 0; k < matrixSize; k++) {
+                matrixC[k][res.col] = res.columnC[k];
+            }
+        }
+
+        return matrixC;
+    }
+
+
+
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
@@ -145,3 +234,5 @@ public class MatrixUtil {
         return true;
     }
 }
+
+

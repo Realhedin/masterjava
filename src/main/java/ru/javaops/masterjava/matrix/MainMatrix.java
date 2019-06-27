@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
  * 03.07.2016
  */
 public class MainMatrix {
-    private static final int MATRIX_SIZE = 300;
+    private static final int MATRIX_SIZE = 1000;
     private static final int THREAD_NUMBER = 10;
 
     private final static ExecutorService executor = Executors.newFixedThreadPool(MainMatrix.THREAD_NUMBER);
@@ -38,13 +38,13 @@ public class MainMatrix {
             singleThreadSum2 += duration;
 
             start = System.currentTimeMillis();
-            final int[][] matrixC3 = MatrixUtil.singleThreadMultiply2(matrixA, matrixB);
+            final int[][] matrixC3 = MatrixUtil.singleThreadMultiply3(matrixA, matrixB);
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time Transp in one loop, sec: %.3f", duration);
             singleThreadSum3 += duration;
 
             start = System.currentTimeMillis();
-            final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
+            final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply2(matrixA, matrixB, executor);
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
