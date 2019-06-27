@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -100,6 +101,32 @@ public class MatrixUtil {
             }
         }
 
+        return matrixC;
+    }
+
+
+    //4th approach using ForkJoinPool (separate not shared)
+    //approach with summing approach by rows
+    public static int[][] concurrentMultiply4(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+
+        new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1)
+                .submit(() -> IntStream.range(0, matrixSize)
+                        .parallel()
+                        .forEach(row -> {
+                            final int[] rowA = matrixA[row];
+                            final int[] rowC = matrixC[row];
+
+                            for (int idx = 0; idx < matrixSize; idx++) {
+                                final int elA = rowA[idx];
+                                final int[] rowB = matrixB[idx];
+                                for (int col = 0; col < matrixSize; col++) {
+                                    rowC[col] += elA * rowB[col];
+                                }
+                            }
+                        })
+                ).get();
         return matrixC;
     }
 
