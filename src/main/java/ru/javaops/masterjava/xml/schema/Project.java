@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -22,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element ref="{http://javaops.ru}Group" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="group" type="{http://www.w3.org/2001/XMLSchema}IDREFS" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -34,8 +37,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "name",
-    "description",
-    "group"
+    "description"
 })
 @XmlRootElement(name = "Project", namespace = "http://javaops.ru")
 public class Project {
@@ -44,8 +46,10 @@ public class Project {
     protected String name;
     @XmlElement(namespace = "http://javaops.ru", required = true)
     protected String description;
-    @XmlElement(name = "Group", namespace = "http://javaops.ru")
-    protected List<Group> group;
+    @XmlAttribute(name = "group")
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
+    protected List<Object> group;
 
     /**
      * Gets the value of the name property.
@@ -113,13 +117,13 @@ public class Project {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Group }
+     * {@link Object }
      * 
      * 
      */
-    public List<Group> getGroup() {
+    public List<Object> getGroup() {
         if (group == null) {
-            group = new ArrayList<Group>();
+            group = new ArrayList<Object>();
         }
         return this.group;
     }

@@ -76,8 +76,8 @@
             <xs:sequence>
                 <xs:element type="xs:string" name="name"/>
                 <xs:element type="xs:string" name="description"/>
-                <xs:element ref="Group" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute type="xs:IDREFS" name="group"/>
         </xs:complexType>
     </xs:element>
 

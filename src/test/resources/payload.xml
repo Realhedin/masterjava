@@ -18,7 +18,7 @@
         <City id="mnsk">Минск</City>
     </Cities>
     <Projects>
-        <Project>
+        <Project group="topJava8">
             <name>topjava</name>
             <description>topjava description</description>
         </Project>
