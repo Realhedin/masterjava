@@ -24,10 +24,10 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="fullName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element ref="{http://javaops.ru}Group" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="flag" use="required" type="{http://javaops.ru}flagType" />
  *       &lt;attribute name="city" use="required" type="{http://www.w3.org/2001/XMLSchema}IDREF" />
+ *       &lt;attribute name="group" type="{http://www.w3.org/2001/XMLSchema}IDREFS" />
  *       &lt;attribute name="email" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,22 +38,23 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "fullName",
-    "group"
+    "fullName"
 })
 @XmlRootElement(name = "User", namespace = "http://javaops.ru")
 public class User {
 
     @XmlElement(namespace = "http://javaops.ru", required = true)
     protected String fullName;
-    @XmlElement(name = "Group", namespace = "http://javaops.ru")
-    protected List<Group> group;
     @XmlAttribute(name = "flag", required = true)
     protected FlagType flag;
     @XmlAttribute(name = "city", required = true)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
     protected Object city;
+    @XmlAttribute(name = "group")
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
+    protected List<Object> group;
     @XmlAttribute(name = "email", required = true)
     protected String email;
 
@@ -79,35 +80,6 @@ public class User {
      */
     public void setFullName(String value) {
         this.fullName = value;
-    }
-
-    /**
-     * Gets the value of the group property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the group property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getGroup().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Group }
-     * 
-     * 
-     */
-    public List<Group> getGroup() {
-        if (group == null) {
-            group = new ArrayList<Group>();
-        }
-        return this.group;
     }
 
     /**
@@ -156,6 +128,35 @@ public class User {
      */
     public void setCity(Object value) {
         this.city = value;
+    }
+
+    /**
+     * Gets the value of the group property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the group property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getGroup().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Object }
+     * 
+     * 
+     */
+    public List<Object> getGroup() {
+        if (group == null) {
+            group = new ArrayList<Object>();
+        }
+        return this.group;
     }
 
     /**

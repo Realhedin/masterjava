@@ -90,6 +90,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Payload.Groups }
+     * 
+     */
+    public Payload.Groups createPayloadGroups() {
+        return new Payload.Groups();
+    }
+
+    /**
      * Create an instance of {@link CityType }
      * 
      */
