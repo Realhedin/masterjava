@@ -2,16 +2,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://javaops.ru payload.xsd">
     <Users>
-        <User flag="active" city="kiv">
-            <email>gmail@gmail.com</email>
+        <User flag="active" city="kiv" email="gmail@gmail.com" group="masterJava3">
             <fullName>Full Name</fullName>
         </User>
-        <User flag="superuser" city="spb">
-            <email>admin@javaops.ru</email>
+        <User flag="superuser" city="spb" email="admin@javaops.ru" group="masterJava3 topJava2">
             <fullName>Admin</fullName>
         </User>
-        <User flag="deleted" city="spb">
-            <email>mail@yandex.ru</email>
+        <User flag="deleted" city="spb" email="mail@yandex.ru">
             <fullName>Deleted</fullName>
         </User>
     </Users>
@@ -20,4 +17,28 @@
         <City id="kiv">Киев</City>
         <City id="mnsk">Минск</City>
     </Cities>
+    <Projects>
+        <Project>
+            <name>topjava</name>
+            <description>topjava description</description>
+        </Project>
+        <Project>
+            <name>masterjava</name>
+            <description>masterjava description</description>
+        </Project>
+    </Projects>
+    <Groups>
+        <Group id="masterJava3">
+            <name>masterJava3</name>
+            <type>CURRENT</type>
+        </Group>
+        <Group id="topJava2">
+            <name>topJava2</name>
+            <type>FINISHED</type>
+        </Group>
+        <Group id="topJava8">
+            <name>topJava8</name>
+            <type>FINISHED</type>
+        </Group>
+    </Groups>
 </Payload>
