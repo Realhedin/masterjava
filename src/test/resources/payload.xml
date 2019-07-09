@@ -22,7 +22,7 @@
             <name>topjava</name>
             <description>topjava description</description>
         </Project>
-        <Project>
+        <Project group="masterJava3">
             <name>masterjava</name>
             <description>masterjava description</description>
         </Project>
