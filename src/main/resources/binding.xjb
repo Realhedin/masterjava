@@ -1,0 +1,20 @@
+<bindings version="2.1" xmlns="http://java.sun.com/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc">
+
+    <bindings schemaLocation="payload.xsd">
+        <schemaBindings>
+            <package name="src.main.resources"/>
+        </schemaBindings>
+        <bindings multiple="true" node="//xs:attribute[@name = 'group' and @type = 'xs:IDREFS']">
+            <property>
+                <baseType name="Group"/>
+            </property>
+        </bindings>
+        <bindings node="//xs:attribute[@name = 'city' and @type = 'xs:IDREF']">
+            <property>
+                <baseType name="CityType"/>
+            </property>
+        </bindings>
+    </bindings>
+</bindings>

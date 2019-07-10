@@ -1,9 +1,9 @@
 package ru.javaops.masterjava.xml;
 
 import org.junit.Test;
-import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.util.JaxbParser;
 import ru.javaops.masterjava.xml.util.Schemas;
+import src.main.resources.ObjectFactory;
 
 /**
  * @author dkorolev

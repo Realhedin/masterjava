@@ -5,9 +5,9 @@ import javax.xml.namespace.QName;
 
 import com.google.common.io.Resources;
 import org.junit.Test;
-import ru.javaops.masterjava.xml.schema.CityType;
-import ru.javaops.masterjava.xml.schema.ObjectFactory;
-import ru.javaops.masterjava.xml.schema.Payload;
+import src.main.resources.CityType;
+import src.main.resources.ObjectFactory;
+import src.main.resources.Payload;
 
 public class JaxbParserTest {
     private static final JaxbParser JAXB_PARSER = new JaxbParser(ObjectFactory.class);

@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.io.Resources;
-import ru.javaops.masterjava.xml.schema.Payload;
-import ru.javaops.masterjava.xml.schema.Project;
-import ru.javaops.masterjava.xml.schema.User;
 import ru.javaops.masterjava.xml.util.JaxbParser;
+import src.main.resources.Group;
+import src.main.resources.Payload;
+import src.main.resources.Project;
+import src.main.resources.User;
 
 /**
  * @author dkorolev
@@ -23,7 +24,7 @@ public class MainXml  {
             Payload payload = jaxbParser.unmarshal(
                     Resources.getResource(fileName).openStream());
             List<Project> projects = payload.getProjects().getProject();
-            List<Object> groups = new ArrayList<>();
+            List<Group> groups = new ArrayList<>();
             //find appropriate group
             for (Project project : projects) {
                 if (projectName.equals(project.getName())) {
@@ -39,7 +40,7 @@ public class MainXml  {
             List<User> users = payload.getUsers().getUser();
             List<String> usersInDesiredGroup = new ArrayList<>(users.size());
             for (User user : users) {
-                List<Object> userGroups = user.getGroup();
+                List<Group> userGroups = user.getGroup();
                 for (Object userGroup : userGroups) {
                     if (groups.contains(userGroup)) {
                         usersInDesiredGroup.add(user.getFullName());
