@@ -3,6 +3,7 @@ package ru.javaops.masterjava.xml.util;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.PropertyException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import java.io.IOException;
@@ -57,6 +58,10 @@ public class JaxbParser {
 
     public <T> T unmarshal(String str) throws JAXBException {
         return (T) jaxbUnmarshaller.unmarshal(str);
+    }
+
+    public <T> T unmarshal(XMLStreamReader reader, Class<T> elementClass) throws JAXBException {
+        return jaxbUnmarshaller.unmarshal(reader, elementClass);
     }
 
     // Marshaller
