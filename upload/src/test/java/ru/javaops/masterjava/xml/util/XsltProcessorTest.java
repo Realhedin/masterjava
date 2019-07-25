@@ -1,9 +1,9 @@
 package ru.javaops.masterjava.xml.util;
 
+import java.io.InputStream;
+
 import com.google.common.io.Resources;
 import org.junit.Test;
-
-import java.io.InputStream;
 
 public class XsltProcessorTest {
     @Test
